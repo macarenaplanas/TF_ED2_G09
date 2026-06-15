@@ -28,3 +28,22 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 * Migración a PCB: Trasladar el diseño actual desde la protoboard hacia un circuito impreso (PCB) optimizado y diseñado bajo normas de compatibilidad electromagnética para entornos médicos.
 * Telemetría Inalámbrica: Implementar un módulo de comunicación para enviar alertas críticas directamente a un panel de monitoreo central en la estación de enfermería.
+
+### Hardware & Interconexión
+
+* **Diagrama de Bloques:**
+
+
+* **Esquemático del Circuito:**
+
+* **Descripción del Circuito y Consideraciones de Diseño:**
+  * *Etapa de Adquisición*: Módulo sensor óptico que capta las variaciones del flujo sanguíneo y entrega una señal analógica al ADC del microcontrolador.
+  * *Etapa de Comunicación*: Módulo conversor USB-TTL (UART) para la conexión bidireccional con la PC. Permite ingresar valores numéricos de frecuencia cardíaca vía Tera Term para comandar el sistema.
+  * *Etapa de Procesamiento y Control*: Microcontrolador PIC16F887. Procesa los datos del sensor y de la PC, clasificando el estado en normal, bradicardia o taquicardia.
+  * *Etapa de Visualización*: Tres displays de 7 segmentos que muestran el valor de las PPM en tiempo real.
+  * *Etapa de Potencia y Actuación*: Driver ULN2003 y motor paso a paso que realiza medio giro para alguno de los costados o se quede donde está, dependiendo de las pulsaciones medidas.
+
+### Software
+* Diagrama de flujos:
+
+* 
