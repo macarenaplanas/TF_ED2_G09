@@ -29,6 +29,9 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 * Migración a PCB: Trasladar el diseño actual desde la protoboard hacia un circuito impreso (PCB) optimizado y diseñado bajo normas de compatibilidad electromagnética para entornos médicos.
 * Telemetría Inalámbrica: Implementar un módulo de comunicación para enviar alertas críticas directamente a un panel de monitoreo central en la estación de enfermería.
 
+---
+
+## Arquitectura del Sistema
 ### Hardware & Interconexión
 
 * **Diagrama de Bloques:**
@@ -46,4 +49,29 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 ### Software
 * Diagrama de flujos:
 
-* 
+---
+
+## Especificaciones Eléctricas, Alimentación y Entorno
+### Parámetros de alimentación y consumo 
+
+* **Tensión de operación del sistema:** Fuente externa regulada de 5V DC.
+
+### Consideraciones de Software
+
+* **Herramientas de Software:** MPLAB X IDE [v5.35] y compilador MPASM [v5.87]
+* **Herramientas de programación:** PICkit 3, bootloader, Tera term
+* **Configuración de Bits**:
+  * Oscilador: XT (Cristal externo de 4MHz)
+  * Watchdog Timer (WDT): OFF
+  * Master Clear (MCLRE): ON
+* **Periféricos Internos Utilizados:** Timer0, ADC, UART
+* **Gestión de Interrupciones:** Se evalúa primero la flag de TMR0 (T0IF) antes que la de interrupción externa (INTF). Esto se debe a que el multiplexado de los displays requiere una temporización estricta y periódica para evitar parpadeos visuales en la pantalla.
+  
+---
+
+## Proceso de Integración y Desarrollo
+ 
+---
+
+## Ensayos, Pruebas y Resultados 
+
