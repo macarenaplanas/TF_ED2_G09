@@ -5,8 +5,8 @@
 >
 >**Integrantes:**
 > * Martina Bruno
-> * Ottero Carolina
-> * Planas Montilla Macarena
+> * Carolina Ottero 
+> * Macarena Planas Montilla 
 >   
 ---
 ##Descripcion general del proyecto
