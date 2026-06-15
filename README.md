@@ -61,7 +61,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 * **Herramientas de Software:** MPLAB X IDE [v5.35] y compilador MPASM [v5.87]
 * **Herramientas de programación:** PICkit 3, bootloader, Tera term
 * **Configuración de Bits**:
-  * Oscilador: XT (Cristal externo de 4MHz)
+  * Oscilador: Cristal externo de 4MHz
   * Watchdog Timer (WDT): OFF
   * Master Clear (MCLRE): ON
 * **Periféricos Internos Utilizados:** Timer0, ADC, UART
