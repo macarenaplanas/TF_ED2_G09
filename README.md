@@ -1,8 +1,7 @@
 # Monitor de frecuencia cardiaca
 >**Asignatura:** Electrónica Digital II  - Universidad Nacional de Córdoba
->
-> **Profesor:** Marcos Blasco
-> **Integrantes:**
+>>**Profesor:** Marcos Blasco
+>> **Integrantes:**
 > * Martina Bruno
 > * Ottero Carolina
 > * Planas Montilla Macarena
