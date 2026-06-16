@@ -65,7 +65,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   * Watchdog Timer (WDT): OFF
   * Master Clear (MCLRE): ON
 * **Periféricos Internos Utilizados:** Timer0, ADC, UART
-* **Gestión de Interrupciones:** Se evalúa primero la flag de TMR0 (T0IF) antes que la de interrupción externa (INTF). Esto se debe a que el multiplexado de los displays requiere una temporización estricta y periódica para evitar parpadeos visuales en la pantalla.
+* **Gestión de Interrupciones:** Primero se evalúa la bandera INTF (interrupción externa de RB0) y luego la bandera T0IF (Timer0). Se prioriza INTF porque corresponde a una acción del usuario (pulsador), por lo que se desea atenderla antes que las interrupciones periódicas del temporizador.
   
 ---
 
