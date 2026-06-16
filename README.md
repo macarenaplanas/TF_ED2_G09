@@ -47,7 +47,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   * *Etapa de Potencia y Actuación*: Driver ULN2003 y motor paso a paso que realiza medio giro para alguno de los costados o se quede donde está, dependiendo de las pulsaciones medidas.
 
 ### Software
-* Diagrama de flujos:
+* Diagrama de flujo:
 
 ---
 
