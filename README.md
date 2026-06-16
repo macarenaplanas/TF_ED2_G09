@@ -40,6 +40,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 
 * **Esquemático del Circuito:**
+* Utilizando software Proteus 8
    ![Esquematico del circuito](hardware/esquematico.jpeg)
 
 * **Descripción del Circuito y Consideraciones de Diseño:**
@@ -63,13 +64,14 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 ### Consideraciones de Software
 
 * **Herramientas de Software:** MPLAB X IDE [v5.35] y compilador MPASM [v5.87]
-* **Herramientas de programación:** PICkit 3, bootloader, Tera term
+* **Herramientas de programación:** PICkit 3, bootloader, Tera term 5 
 * **Configuración de Bits**:
-  * Oscilador: Cristal externo de 4MHz
+  * Oscilador: Cristal externo de 4MHz 
   * Watchdog Timer (WDT): OFF
   * Master Clear (MCLRE): ON
 * **Periféricos Internos Utilizados:** Timer0, ADC, UART
 * **Gestión de Interrupciones:** Primero se evalúa la bandera INTF (interrupción externa de RB0) y luego la bandera T0IF (Timer0). Se prioriza INTF porque corresponde a una acción del usuario (pulsador), por lo que se desea atenderla antes que las interrupciones periódicas del temporizador.
+
   
 ---
 
