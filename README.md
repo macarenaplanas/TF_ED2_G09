@@ -35,6 +35,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 ### Hardware & Interconexión
 
 * **Diagrama de Bloques:**
+  
  ![Diagrama de bloques](hardware/Dbloques.jpg)
 
 
