@@ -4,9 +4,9 @@
 >**Profesor:** Marcos Blasco
 >
 >**Integrantes:**
-> * Martina Bruno
-> * Carolina Ottero 
-> * Macarena Planas Montilla 
+> * Martina 46320251
+> * Carolina Ottero 46226180
+> * Macarena Planas Montilla 45486586
 >   
 ---
 ## Descripcion general del proyecto
@@ -46,7 +46,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   * *Etapa de Adquisición*: Módulo sensor óptico que capta las variaciones del flujo sanguíneo y entrega una señal analógica al ADC del microcontrolador.
   * *Etapa de Comunicación*: Módulo conversor USB-TTL (UART) para la conexión bidireccional con la PC. Permite ingresar valores numéricos de frecuencia cardíaca vía Tera Term para comandar el sistema.
   * *Etapa de Procesamiento y Control*: Microcontrolador PIC16F887. Procesa los datos del sensor y de la PC, clasificando el estado en normal, bradicardia o taquicardia.
-  * *Etapa de Visualización*: Tres displays de 7 segmentos que muestran el valor de las PPM en tiempo real.
+  * *Etapa de Visualización*: Tres displays ánodo común de 7 segmentos que muestran el valor de las PPM en tiempo real.
   * *Etapa de Potencia y Actuación*: Driver ULN2003 y motor paso a paso que realiza medio giro para alguno de los costados o se quede donde está, dependiendo de las pulsaciones medidas.
 
 ### Software
@@ -74,6 +74,17 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 ---
 
 ## Proceso de Integración y Desarrollo
+
+* **Etapa 1: Configuración del ADC y Displays (Potenciómetro)**: Prueba inicial del módulo ADC y del multiplexado de los displays de 7 segmentos utilizando un potenciómetro como entrada analógica variable en RA0.
+
+* **Etapa 2: Validación del Sensor Óptico**: Verificación del correcto funcionamiento del sensor y el comportamiento de su señal analógica de salida.
+
+* **Etapa 3: Control Independiente del Motor**: Desarrollo y validación de las rutinas de paso (secuencias en las tablas)  para asegurar el giro correcto del motor paso a paso.
+
+* **Etapa 4: Integración de ADC y Comunicación UART**: Ensayo conjunto del conversor analógico-digital con el módulo de comunicación serie para verificar el envío de lecturas y la recepción de comandos desde Tera Term.
+
+* **Etapa 5: Vinculación de todos los módulos**: lectura del sensor, procesamiento de las PPM, clasificación del estado del paciente y activación del motor como actuador final.
+
  
 ---
 
