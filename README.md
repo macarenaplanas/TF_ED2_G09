@@ -35,9 +35,11 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 ### Hardware & Interconexión
 
 * **Diagrama de Bloques:**
+ ![Diagrama de bloques](hardware/Dbloques.jpg)
 
 
 * **Esquemático del Circuito:**
+   ![Esquematico del circuito](hardware/esquematico.jpeg)
 
 * **Descripción del Circuito y Consideraciones de Diseño:**
   * *Etapa de Adquisición*: Módulo sensor óptico que capta las variaciones del flujo sanguíneo y entrega una señal analógica al ADC del microcontrolador.
@@ -47,7 +49,8 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   * *Etapa de Potencia y Actuación*: Driver ULN2003 y motor paso a paso que realiza medio giro para alguno de los costados o se quede donde está, dependiendo de las pulsaciones medidas.
 
 ### Software
-* Diagrama de flujo:
+* **Diagrama de flujo:**
+  ![Diagrama de flujo](hardware/Dflujo.jpg)
 
 ---
 
