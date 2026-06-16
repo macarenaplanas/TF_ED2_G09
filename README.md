@@ -4,7 +4,7 @@
 >**Profesor:** Marcos Blasco
 >
 >**Integrantes:**
-> * Martina 46320251
+> * Martina Bruno 46320251
 > * Carolina Ottero 46226180
 > * Macarena Planas Montilla 45486586
 >   
