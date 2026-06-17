@@ -3,10 +3,12 @@
 >
 >**Profesor:** Marcos Blasco
 >
+>**Año 2026**
+>
 >**Integrantes:**
-> * Martina Bruno 46320251
-> * Carolina Ottero 46226180
-> * Macarena Planas Montilla 45486586
+> * Martina Bruno - 46320251
+> * Carolina Ottero - 46226180
+> * Macarena Planas Montilla - 45486586
 >   
 ---
 ## Descripcion general del proyecto
@@ -91,4 +93,20 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 ---
 
 ## Ensayos, Pruebas y Resultados 
+
+* **Ensayo 1: Validación del ADC (Con Potenciómetro):**  Se utilizó un potenciómetro, donde luego se colocó el sensor, con visualización en los displays de 7 segmentos, para comprobar la correcta programación del mismo. 
+![Validación del ADC utilizando potenciómetro](docs/potenciometro.jpeg) 
+
+* **Ensayo 2: Adquisición de la Señal del Sensor Óptico y Cálculo de PPM:** Con el sensor colocado en el dedo del usuario, se capturó la señal analógica. Se configuró un umbral por software para detectar los picos de la onda y calcular los intervalos entre latidos.
+
+* **Etapa 3: Control Independiente del Motor**: Utilizando un botón como interrupción externa, se comprobó el correcto funcionamiento del motor paso a paso; en el que al presionarlo, el motor hacia medio giro.
+
+* **Ensayo 4: Integración de ADC y Comunicación UART:** Se conectó el microcontrolador a la PC mediante el módulo UART. Se comprobó la transmisión periódica de datos, en el que cada vez que se procesaba un ciclo de lecturas, el sistema enviaba de forma clara el valor de PPM y el estado de alerta del paciente. Asimismo, se testeó la recepción de comandos desde Tera Term hacia el sistema sin pérdida de caracteres. 
+![Circuito junto con la comunicación en serie](docs/comunicacion.jpeg) 
+
+* **Ensayo 5: Lógica de Control y Actuación del Motor Paso a Paso:** Se forzaron diferentes rangos de PPM simulados para evaluar la lógica de toma de decisiones del sistema y la respuesta del motor: 
+     * *Estado Normal:* El motor no se mueve. 
+     * *Estado Crítico (Taquicardia/Bradicardia):* Al cruzar los umbrales configurados, el motor gira hacia la posición de alerta de manera inmediata y fluida. 
+![Circuito mostrando lecturas en los displays](docs/circuito.jpeg)  
+
 
