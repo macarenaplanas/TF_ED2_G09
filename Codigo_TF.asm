@@ -1,0 +1,824 @@
+; ============================================================
+;  PIC16F887 - FC con sensor ADC + displays MUX + motor
+;  UART: recibe valor numerico desde TeraTerm
+;  <70=B motor derecha, 70-120=N sin motor, >120=A motor izquierda
+;  RB0 = boton reset: pone displays en 0 y motor al centro
+; ============================================================
+
+    LIST    p=16F887
+    RADIX   HEX
+    #include "p16f887.inc"
+
+    __CONFIG _CONFIG1, _FOSC_XT & _WDTE_OFF & _PWRTE_ON & _MCLRE_ON & _CP_OFF & _CPD_OFF & _BOREN_ON & _IESO_OFF & _FCMEN_OFF & _LVP_OFF
+    __CONFIG _CONFIG2, _BOR40V & _WRT_OFF
+
+; ------------------ VARIABLES---------------------------
+    CBLOCK  0x20
+        W_TEMP
+        STATUS_TEMP
+        MUX_STATE
+        DISP_UNI
+        DISP_DEC
+        DISP_CENT
+        VAL_ADC
+        TEMP_DIV
+        DLY1
+        DLY2
+
+        ADC_SIG
+        PULSO_COUNT
+        BLOQUEO
+        BASE_ADC
+        BASE_INIT
+        DIF_ADC
+        REFRACT
+        BASE_SKIP
+        REARME_TO
+
+        TIEMPO_L
+        TIEMPO_H
+        STOP_FLAG
+
+        BTN_LOCK
+        MODO_LETRA
+        TX_CHAR
+
+        MOTOR_STEP
+        PASOS_L
+        PASOS_H
+        MOTOR_OUT
+        MOTOR_POS
+
+        RX_BUF
+        RX_COUNT
+        UMBRAL
+    ENDC
+
+    ORG     0x0000
+    GOTO    INICIO
+
+    ORG     0x0004
+    GOTO    ISR
+    
+    ORG     0x0010
+    
+TABLA_7SEG:
+    ADDWF   PCL, F
+    RETLW   B'11000000'     ; 0
+    RETLW   B'11111001'     ; 1
+    RETLW   B'10100100'     ; 2
+    RETLW   B'10110000'     ; 3
+    RETLW   B'10011001'     ; 4
+    RETLW   B'10010010'     ; 5
+    RETLW   B'10000010'     ; 6
+    RETLW   B'11111000'     ; 7
+    RETLW   B'10000000'     ; 8
+    RETLW   B'10010000'     ; 9
+    RETLW   B'10001000'     ; 10 = A alto
+    RETLW   B'10000011'     ; 11 = b bajo
+    RETLW   B'10101011'     ; 12 = n normal
+
+TABLA_MOTOR:
+    ADDWF   PCL,F
+    RETLW   B'00010000'
+    RETLW   B'00110000'
+    RETLW   B'00100000'
+    RETLW   B'01100000'
+    RETLW   B'01000000'
+    RETLW   B'11000000'
+    RETLW   B'10000000'
+    RETLW   B'10010000'
+
+;  ---------------ISR-----------------------
+ISR:
+    MOVWF   W_TEMP
+    SWAPF   STATUS, W
+    MOVWF   STATUS_TEMP
+    BCF     STATUS, RP0
+    BCF     STATUS, RP1
+
+    BTFSS   INTCON, T0IF
+    GOTO    ISR_FIN
+
+    MOVF    MUX_STATE, W
+    XORLW   0x00
+    BTFSC   STATUS, Z
+    GOTO    MUX_UNI
+
+    XORLW   0x01
+    BTFSC   STATUS, Z
+    GOTO    MUX_DEC
+
+    CLRF    MUX_STATE
+    GOTO    MUX_CENT
+
+    BSF     PORTC, 0
+    BSF     PORTC, 1
+    BSF     PORTC, 2
+
+    MOVF    MUX_STATE, W
+    XORLW   0x00
+    BTFSC   STATUS, Z
+    GOTO    MUX_UNI
+
+    MOVF    MUX_STATE, W
+    XORLW   0x01
+    BTFSC   STATUS, Z
+    GOTO    MUX_DEC
+
+    GOTO    MUX_CENT
+
+MUX_UNI:
+    MOVF    DISP_UNI, W
+    CALL    TABLA_7SEG
+    MOVWF   PORTD
+    BSF     PORTC, 1
+    BSF     PORTC, 2
+    BCF     PORTC, 0
+    MOVLW   0x01
+    MOVWF   MUX_STATE
+    GOTO    ISR_CLR
+
+MUX_DEC:
+    MOVF    DISP_DEC, W
+    CALL    TABLA_7SEG
+    MOVWF   PORTD
+    BSF     PORTC, 0
+    BSF     PORTC, 2
+    BCF     PORTC, 1
+    MOVLW   0x02
+    MOVWF   MUX_STATE
+    GOTO    ISR_CLR
+
+MUX_CENT:
+    MOVF    DISP_CENT, W
+    CALL    TABLA_7SEG
+    MOVWF   PORTD
+    BSF     PORTC, 0
+    BSF     PORTC, 1
+    BCF     PORTC, 2
+    CLRF    MUX_STATE
+
+ISR_CLR:
+    BCF     INTCON, T0IF
+
+    MOVF    STOP_FLAG, F
+    BTFSS   STATUS, Z
+    GOTO    ISR_FIN
+
+    DECFSZ  TIEMPO_L, F
+    GOTO    ISR_FIN
+
+    DECFSZ  TIEMPO_H, F
+    GOTO    ISR_FIN
+
+    MOVLW   D'1'
+    MOVWF   STOP_FLAG
+
+ISR_FIN:
+    SWAPF   STATUS_TEMP, W
+    MOVWF   STATUS
+    SWAPF   W_TEMP, F
+    SWAPF   W_TEMP, W
+    RETFIE
+
+;  -------------------INICIO---------------------
+INICIO:
+    CLRF    ADC_SIG
+    CLRF    PULSO_COUNT
+    CLRF    BLOQUEO
+    CLRF    BASE_ADC
+    CLRF    BASE_INIT
+    CLRF    DIF_ADC
+    CLRF    REFRACT
+    CLRF    BASE_SKIP
+    CLRF    REARME_TO
+    CLRF    BTN_LOCK
+    CLRF    MODO_LETRA
+    CLRF    TX_CHAR
+    CLRF    MOTOR_STEP
+    CLRF    PASOS_L
+    CLRF    PASOS_H
+    CLRF    MOTOR_OUT
+    CLRF    MOTOR_POS
+    CLRF    RX_BUF
+    CLRF    RX_COUNT
+    CLRF    UMBRAL
+
+    MOVLW   low D'29297'
+    MOVWF   TIEMPO_L
+    MOVLW   high D'29297'
+    MOVWF   TIEMPO_H
+    CLRF    STOP_FLAG
+
+    BANKSEL ANSEL
+    MOVLW   B'00000001'
+    MOVWF   ANSEL
+    CLRF    ANSELH
+
+    BANKSEL TRISA
+    MOVLW   B'00000001'
+    MOVWF   TRISA
+
+    BANKSEL TRISC
+    MOVLW   B'10111000'
+    MOVWF   TRISC
+
+    BANKSEL TRISB
+    MOVLW   B'00001111'     ; RB0-RB3 entradas, RB4-RB7 salidas motor
+    MOVWF   TRISB
+
+    BANKSEL WPUB
+    MOVLW   B'00000001'     ; pull-up en RB0
+    MOVWF   WPUB
+
+    BANKSEL OPTION_REG
+    MOVLW   B'01000010'     ; RBPU=0 habilita pull-ups, prescaler 1:8
+    MOVWF   OPTION_REG
+
+    BANKSEL TRISD
+    CLRF    TRISD
+
+    BANKSEL ADCON1
+    MOVLW   B'00000000'
+    MOVWF   ADCON1
+
+    BCF     STATUS, RP0
+    BCF     STATUS, RP1
+
+    MOVLW   B'01000001'
+    MOVWF   ADCON0
+
+    CALL    UART_INIT
+
+    MOVLW   0xFF
+    MOVWF   PORTD
+    BSF     PORTC, 0
+    BSF     PORTC, 1
+    BSF     PORTC, 2
+
+    CLRF    MUX_STATE
+    CLRF    DISP_UNI
+    CLRF    DISP_DEC
+    CLRF    DISP_CENT
+    CLRF    VAL_ADC
+
+    MOVLW   B'10100000'
+    MOVWF   INTCON
+
+; ------------ LOOP PRINCIPAL-------------------
+LOOP:
+    CALL    CHECK_BTN_RESET ; chequear boton RB0
+    CALL    CHECK_UART_RX
+
+    MOVF    MODO_LETRA, F
+    BTFSS   STATUS, Z
+    GOTO    LOOP_LETRA
+
+    CALL    DELAY_ACQ
+    BSF     ADCON0, GO
+
+WAIT_ADC:
+    BTFSC   ADCON0, GO
+    GOTO    WAIT_ADC
+
+    MOVF    ADRESH, W
+    MOVWF   ADC_SIG
+
+    CALL    DETECTAR_PICO
+
+    MOVF    PULSO_COUNT, W
+    MOVWF   VAL_ADC
+
+    CALL    BIN_TO_BCD
+    CALL    DELAY_LOOP
+    GOTO    LOOP
+
+LOOP_LETRA:
+    CALL    CHECK_BTN_RESET ; seguir chequeando boton aunque muestre letra
+    CALL    CHECK_UART_RX
+    CALL    DELAY_LOOP
+    GOTO    LOOP_LETRA
+
+;  --------------CHECK_BTN_RESET (RB0 = 0 (apretado) -> reset completo del sistema)--------
+CHECK_BTN_RESET:
+    BANKSEL PORTB
+    BTFSC   PORTB, 0        ; RB0 = 0 si esta apretado
+    RETURN                  ; suelto, no hacer nada
+
+    BANKSEL BTN_LOCK
+    MOVF    BTN_LOCK, F
+    BTFSS   STATUS, Z
+    RETURN                  ; ya estaba procesado, ignorar
+
+    MOVLW   D'1'
+    MOVWF   BTN_LOCK        ; marcar como procesado
+
+    CALL    MOTOR_VOLVER_CENTRO
+
+    CLRF    DISP_UNI
+    CLRF    DISP_DEC
+    CLRF    DISP_CENT
+
+    CLRF    PULSO_COUNT
+    CLRF    VAL_ADC
+    CLRF    BASE_INIT
+    CLRF    BLOQUEO
+    CLRF    REFRACT
+    CLRF    REARME_TO
+    CLRF    BASE_SKIP
+    CLRF    BASE_ADC
+
+    MOVLW   low D'29297'
+    MOVWF   TIEMPO_L
+    MOVLW   high D'29297'
+    MOVWF   TIEMPO_H
+    CLRF    STOP_FLAG
+
+    CLRF    MODO_LETRA
+    CLRF    RX_BUF
+    CLRF    RX_COUNT
+    CLRF    UMBRAL
+
+    RETURN
+
+BTN_SUELTO:
+    BANKSEL BTN_LOCK
+    CLRF    BTN_LOCK
+    RETURN
+
+; ------------------ MOTOR_VOLVER_CENTRO------------------------------
+MOTOR_VOLVER_CENTRO:
+    BANKSEL MOTOR_POS
+
+    MOVF    MOTOR_POS, W
+    XORLW   0x01
+    BTFSC   STATUS, Z
+    GOTO    MVC_IZQUIERDA
+
+    MOVF    MOTOR_POS, W
+    XORLW   0x02
+    BTFSC   STATUS, Z
+    GOTO    MVC_DERECHA
+
+    RETURN                  ; ya esta en centro
+
+MVC_IZQUIERDA:
+    CALL    MOTOR_MEDIO_IZQUIERDA
+    CLRF    MOTOR_POS
+    RETURN
+
+MVC_DERECHA:
+    CALL    MOTOR_MEDIO_DERECHA
+    CLRF    MOTOR_POS
+    RETURN
+
+;  -----------BIN_TO_BCD------------------------
+BIN_TO_BCD:
+    CLRF    DISP_CENT
+    CLRF    DISP_DEC
+    MOVF    VAL_ADC, W
+    MOVWF   TEMP_DIV
+
+DIV_100:
+    MOVLW   D'100'
+    SUBWF   TEMP_DIV, W
+    BTFSS   STATUS, C
+    GOTO    DIV_10
+    MOVWF   TEMP_DIV
+    INCF    DISP_CENT, F
+    GOTO    DIV_100
+
+DIV_10:
+    MOVLW   D'10'
+    SUBWF   TEMP_DIV, W
+    BTFSS   STATUS, C
+    GOTO    BCD_FIN
+    MOVWF   TEMP_DIV
+    INCF    DISP_DEC, F
+    GOTO    DIV_10
+
+BCD_FIN:
+    MOVF    TEMP_DIV, W
+    MOVWF   DISP_UNI
+    RETURN
+
+;  -------------DELAYS---------------
+DELAY_ACQ:
+    MOVLW   0x0A
+    MOVWF   DLY1
+DAC_LOOP:
+    DECFSZ  DLY1, F
+    GOTO    DAC_LOOP
+    RETURN
+
+DELAY_LOOP:
+    MOVLW   D'7'
+    MOVWF   DLY2
+DL_OUT:
+    MOVLW   0xFF
+    MOVWF   DLY1
+DL_IN:
+    DECFSZ  DLY1, F
+    GOTO    DL_IN
+    DECFSZ  DLY2, F
+    GOTO    DL_OUT
+    RETURN
+
+; ---------------- DETECTAR PICO----------------
+DETECTAR_PICO:
+    MOVF    STOP_FLAG, W
+    BTFSS   STATUS, Z
+    RETURN
+
+    MOVF    BASE_INIT, F
+    BTFSS   STATUS, Z
+    GOTO    DP_BASE_LISTA
+
+    CALL    DP_RESET_BASE
+    MOVLW   D'1'
+    MOVWF   BASE_INIT
+    CLRF    BLOQUEO
+    CLRF    REFRACT
+    CLRF    REARME_TO
+    RETURN
+
+DP_BASE_LISTA:
+    INCF    BASE_SKIP, F
+    MOVLW   D'16'
+    SUBWF   BASE_SKIP, W
+    BTFSS   STATUS, C
+    GOTO    DP_CALC_DIF
+    CLRF    BASE_SKIP
+    MOVF    BASE_ADC, W
+    SUBWF   ADC_SIG, W
+    BTFSS   STATUS, C
+    GOTO    DP_BASE_BAJA
+    BTFSC   STATUS, Z
+    GOTO    DP_CALC_DIF
+    INCF    BASE_ADC, F
+    GOTO    DP_CALC_DIF
+
+DP_BASE_BAJA:
+    DECF    BASE_ADC, F
+
+DP_CALC_DIF:
+    MOVF    BASE_ADC, W
+    SUBWF   ADC_SIG, W
+    BTFSS   STATUS, C
+    GOTO    DP_DIF_NEG
+    MOVWF   DIF_ADC
+    GOTO    DP_RECHAZO_MOV
+
+DP_DIF_NEG:
+    MOVF    ADC_SIG, W
+    SUBWF   BASE_ADC, W
+    MOVWF   DIF_ADC
+
+DP_RECHAZO_MOV:
+    MOVLW   D'30'
+    SUBWF   DIF_ADC, W
+    BTFSC   STATUS, C
+    GOTO    DP_MOVIMIENTO
+
+DP_ESTADO:
+    MOVF    BLOQUEO, F
+    BTFSS   STATUS, Z
+    GOTO    DP_BLOQUEADO
+
+DP_ARMADO:
+    MOVLW   D'6'
+    SUBWF   DIF_ADC, W
+    BTFSS   STATUS, C
+    RETURN
+    INCF    PULSO_COUNT, F
+    MOVLW   D'1'
+    MOVWF   BLOQUEO
+    MOVLW   D'45'
+    MOVWF   REFRACT
+    MOVLW   D'80'
+    MOVWF   REARME_TO
+    RETURN
+
+DP_BLOQUEADO:
+    MOVF    REFRACT, F
+    BTFSC   STATUS, Z
+    GOTO    DP_VER_BAJO
+    DECF    REFRACT, F
+    RETURN
+
+DP_VER_BAJO:
+    MOVLW   D'4'
+    SUBWF   DIF_ADC, W
+    BTFSS   STATUS, C
+    GOTO    DP_REARMAR
+    MOVF    REARME_TO, F
+    BTFSC   STATUS, Z
+    GOTO    DP_FORZAR_REARME
+    DECF    REARME_TO, F
+    RETURN
+
+DP_REARMAR:
+    CLRF    BLOQUEO
+    CLRF    REARME_TO
+    RETURN
+
+DP_FORZAR_REARME:
+    CALL    DP_RESET_BASE
+    CLRF    BLOQUEO
+    CLRF    REARME_TO
+    RETURN
+
+DP_MOVIMIENTO:
+    CALL    DP_RESET_BASE
+    MOVLW   D'1'
+    MOVWF   BLOQUEO
+    MOVLW   D'20'
+    MOVWF   REFRACT
+    MOVLW   D'30'
+    MOVWF   REARME_TO
+    RETURN
+
+DP_RESET_BASE:
+    MOVF    ADC_SIG, W
+    MOVWF   BASE_ADC
+    CLRF    DIF_ADC
+    CLRF    BASE_SKIP
+    RETURN
+
+; ----------------- UART 9600 bps, Fosc = 4MHz--------------
+UART_INIT:
+    BANKSEL BAUDCTL
+    CLRF    BAUDCTL
+
+    BANKSEL SPBRG
+    MOVLW   D'25'
+    MOVWF   SPBRG
+
+    BANKSEL TXSTA
+    MOVLW   B'00100100'
+    MOVWF   TXSTA
+
+    BANKSEL RCSTA
+    MOVLW   B'10010000'     ; SPEN=1, CREN=1
+    MOVWF   RCSTA
+
+    RETURN
+
+UART_SEND_W:
+    BANKSEL TX_CHAR
+    MOVWF   TX_CHAR
+
+UART_WAIT:
+    BANKSEL PIR1
+    BTFSS   PIR1, TXIF
+    GOTO    UART_WAIT
+
+    BANKSEL TX_CHAR
+    MOVF    TX_CHAR, W
+    BANKSEL TXREG
+    MOVWF   TXREG
+    RETURN
+
+UART_CRLF:
+    MOVLW   0x0D
+    CALL    UART_SEND_W
+    MOVLW   0x0A
+    CALL    UART_SEND_W
+    RETURN
+
+; -----------CHECK_UART_RX------------------------------
+CHECK_UART_RX:
+    BANKSEL PIR1
+    BTFSS   PIR1, RCIF
+    RETURN
+
+    BANKSEL RCREG
+    MOVF    RCREG, W
+
+    XORLW   0x0D
+    BTFSC   STATUS, Z
+    GOTO    UART_GOT_CR
+
+    XORLW   0x0D
+
+    MOVWF   TX_CHAR
+    MOVLW   0x30
+    SUBWF   TX_CHAR, W
+    BTFSS   STATUS, C
+    RETURN
+
+    MOVLW   0x3A
+    SUBWF   TX_CHAR, W
+    BTFSC   STATUS, C
+    RETURN
+
+    MOVLW   0x30
+    SUBWF   TX_CHAR, W
+    MOVWF   TX_CHAR
+
+    BANKSEL RX_BUF
+    MOVF    RX_BUF, W
+    MOVWF   TEMP_DIV
+
+    BCF     STATUS, C
+    RLF     RX_BUF, F
+    MOVF    RX_BUF, W
+    MOVWF   DLY1
+
+    BCF     STATUS, C
+    RLF     TEMP_DIV, F
+    BCF     STATUS, C
+    RLF     TEMP_DIV, F
+    BCF     STATUS, C
+    RLF     TEMP_DIV, F
+
+    MOVF    DLY1, W
+    ADDWF   TEMP_DIV, F
+    MOVF    TX_CHAR, W
+    ADDWF   TEMP_DIV, W
+    MOVWF   RX_BUF
+
+    INCF    RX_COUNT, F
+
+    MOVLW   D'3'
+    SUBWF   RX_COUNT, W
+    BTFSC   STATUS, C
+    GOTO    UART_GOT_CR
+
+    RETURN
+
+UART_GOT_CR:
+    BANKSEL RCSTA
+    BTFSS   RCSTA, OERR
+    GOTO    UART_RX_PROC
+    BCF     RCSTA, CREN
+    BSF     RCSTA, CREN
+
+UART_RX_PROC:
+    CALL    PROCESAR_UMBRAL
+    BANKSEL RX_BUF
+    CLRF    RX_BUF
+    CLRF    RX_COUNT
+    RETURN
+
+; ----------------- PROCESAR_UMBRAL---------------------------------
+PROCESAR_UMBRAL:
+    BANKSEL STOP_FLAG
+    MOVF    STOP_FLAG, F
+    BTFSC   STATUS, Z
+    RETURN
+
+    MOVF    MODO_LETRA, F
+    BTFSS   STATUS, Z
+    RETURN
+
+    MOVF    RX_BUF, W
+    MOVWF   UMBRAL
+
+    CALL    ENVIAR_RESULTADO_UART
+    RETURN
+
+;-----------------ENVIAR_RESULTADO_UART-----------------------------------
+ENVIAR_RESULTADO_UART:
+    BANKSEL UMBRAL
+
+    MOVLW   D'70'
+    SUBWF   UMBRAL, W
+    BTFSS   STATUS, C
+    GOTO    EURI_BAJO
+
+    MOVLW   D'121'
+    SUBWF   UMBRAL, W
+    BTFSC   STATUS, C
+    GOTO    EURI_ALTO
+
+    GOTO    EURI_NORMAL
+
+EURI_BAJO:
+    MOVLW   0x42
+    CALL    UART_SEND_W
+    CALL    UART_CRLF
+    MOVLW   D'11'
+    CALL    MOSTRAR_LETRA
+    CALL    MOTOR_MEDIO_DERECHA
+    MOVLW   0x01
+    MOVWF   MOTOR_POS
+    RETURN
+
+EURI_NORMAL:
+    MOVLW   0x4E
+    CALL    UART_SEND_W
+    CALL    UART_CRLF
+    MOVLW   D'12'
+    CALL    MOSTRAR_LETRA
+    CLRF    MOTOR_POS
+    RETURN
+
+EURI_ALTO:
+    MOVLW   0x41
+    CALL    UART_SEND_W
+    CALL    UART_CRLF
+    MOVLW   D'10'
+    CALL    MOSTRAR_LETRA
+    CALL    MOTOR_MEDIO_IZQUIERDA
+    MOVLW   0x02
+    MOVWF   MOTOR_POS
+    RETURN
+
+; ---------------MOSTRAR_LETRA------------------------------------
+MOSTRAR_LETRA:
+    BANKSEL DISP_UNI
+    MOVWF   DISP_UNI
+    MOVWF   DISP_DEC
+    MOVWF   DISP_CENT
+    MOVLW   D'1'
+    MOVWF   MODO_LETRA
+    RETURN
+
+; ------------MOTOR PASO A PASO-------------------   
+CARGAR_MEDIO_GIRO:
+    MOVLW   LOW D'2048'
+    MOVWF   PASOS_L
+    MOVLW   HIGH D'2048'
+    MOVWF   PASOS_H
+    RETURN
+
+MOTOR_MEDIO_DERECHA:
+    CALL    CARGAR_MEDIO_GIRO
+MOT_DER_LOOP:
+    CALL    MOTOR_DERECHA_1
+    CALL    MOTOR_DELAY
+    DECFSZ  PASOS_L, F
+    GOTO    MOT_DER_LOOP
+    DECFSZ  PASOS_H, F
+    GOTO    MOT_DER_LOOP
+    CALL    MOTOR_OFF
+    RETURN
+
+MOTOR_MEDIO_IZQUIERDA:
+    CALL    CARGAR_MEDIO_GIRO
+MOT_IZQ_LOOP:
+    CALL    MOTOR_IZQUIERDA_1
+    CALL    MOTOR_DELAY
+    DECFSZ  PASOS_L, F
+    GOTO    MOT_IZQ_LOOP
+    DECFSZ  PASOS_H, F
+    GOTO    MOT_IZQ_LOOP
+    CALL    MOTOR_OFF
+    RETURN
+
+MOTOR_DERECHA_1:
+    MOVF    MOTOR_STEP, W
+    CALL    TABLA_MOTOR
+    CALL    MOTOR_WRITE_W
+    INCF    MOTOR_STEP, F
+    MOVLW   D'8'
+    SUBWF   MOTOR_STEP, W
+    BTFSC   STATUS, C
+    CLRF    MOTOR_STEP
+    RETURN
+
+MOTOR_IZQUIERDA_1:
+    MOVF    MOTOR_STEP, W
+    CALL    TABLA_MOTOR
+    CALL    MOTOR_WRITE_W
+    MOVF    MOTOR_STEP, F
+    BTFSC   STATUS, Z
+    GOTO    MOT_IZQ_WRAP
+    DECF    MOTOR_STEP, F
+    RETURN
+
+MOT_IZQ_WRAP:
+    MOVLW   D'7'
+    MOVWF   MOTOR_STEP
+    RETURN
+
+MOTOR_WRITE_W:
+    MOVWF   MOTOR_OUT
+    MOVF    PORTB, W
+    ANDLW   B'00001111'
+    IORWF   MOTOR_OUT, W
+    MOVWF   PORTB
+    RETURN
+
+MOTOR_OFF:
+    MOVF    PORTB, W
+    ANDLW   B'00001111'
+    MOVWF   PORTB
+    RETURN
+
+MOTOR_DELAY:
+    MOVLW   D'5'
+    MOVWF   DLY2
+MOT_DELAY_OUT:
+    MOVLW   0xFF
+    MOVWF   DLY1
+MOT_DELAY_IN:
+    DECFSZ  DLY1, F
+    GOTO    MOT_DELAY_IN
+    DECFSZ  DLY2, F
+    GOTO    MOT_DELAY_OUT
+    RETURN
+
+    END
