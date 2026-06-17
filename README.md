@@ -38,12 +38,16 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 * **Diagrama de Bloques:**
   
- ![Diagrama de bloques](hardware/Dbloques.jpg)
+<p align="center">
+  <img src="hardware/Dbloques.jpg" width="500">
+</p>
 
 
 * **Esquemático del Circuito:**
 * Utilizando software Proteus 8
-   ![Esquematico del circuito](hardware/esquematico.jpeg)
+<p align="center">
+  <img src="hardware/esquematico.jpeg" width="500">
+</p>
 
 * **Descripción del Circuito y Consideraciones de Diseño:**
   * *Etapa de Adquisición*: Módulo sensor óptico que capta las variaciones del flujo sanguíneo y entrega una señal analógica al ADC del microcontrolador.
@@ -54,7 +58,9 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 ### Software
 * **Diagrama de flujo:**
-  ![Diagrama de flujo](hardware/Dflujo.jpg)
+<p align="center">
+  <img src="hardware/Dflujo.jpg" width="500">
+</p>
 
 ---
 
@@ -73,7 +79,6 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   * Master Clear (MCLRE): ON
 * **Periféricos Internos Utilizados:** Timer0, ADC, UART
 * **Gestión de Interrupciones:** Primero se evalúa la bandera INTF (interrupción externa de RB0) y luego la bandera T0IF (Timer0). Se prioriza INTF porque corresponde a una acción del usuario (pulsador), por lo que se desea atenderla antes que las interrupciones periódicas del temporizador.
-
   
 ---
 
@@ -88,25 +93,28 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 * **Etapa 4: Integración de ADC y Comunicación UART**: Ensayo conjunto del conversor analógico-digital con el módulo de comunicación serie para verificar el envío de lecturas y la recepción de comandos desde Tera Term.
 
 * **Etapa 5: Vinculación de todos los módulos**: lectura del sensor, procesamiento de las PPM, clasificación del estado del paciente y activación del motor como actuador final.
-
  
 ---
 
 ## Ensayos, Pruebas y Resultados 
 
 * **Ensayo 1: Validación del ADC (Con Potenciómetro):**  Se utilizó un potenciómetro, donde luego se colocó el sensor, con visualización en los displays de 7 segmentos, para comprobar la correcta programación del mismo. 
-![Validación del ADC utilizando potenciómetro](docs/potenciometro.jpeg) 
+<p align="center">
+  <img src="docs/potenciometro.jpeg" width="400">
+</p>
 
 * **Ensayo 2: Adquisición de la Señal del Sensor Óptico y Cálculo de PPM:** Con el sensor colocado en el dedo del usuario, se capturó la señal analógica. Se configuró un umbral por software para detectar los picos de la onda y calcular los intervalos entre latidos.
 
 * **Etapa 3: Control Independiente del Motor**: Utilizando un botón como interrupción externa, se comprobó el correcto funcionamiento del motor paso a paso; en el que al presionarlo, el motor hacia medio giro.
 
 * **Ensayo 4: Integración de ADC y Comunicación UART:** Se conectó el microcontrolador a la PC mediante el módulo UART. Se comprobó la transmisión periódica de datos, en el que cada vez que se procesaba un ciclo de lecturas, el sistema enviaba de forma clara el valor de PPM y el estado de alerta del paciente. Asimismo, se testeó la recepción de comandos desde Tera Term hacia el sistema sin pérdida de caracteres. 
-![Circuito junto con la comunicación en serie](docs/comunicacion.jpeg) 
+<p align="center">
+  <img src="docs/comunicacion.jpeg" width="400">
+</p>
 
 * **Ensayo 5: Lógica de Control y Actuación del Motor Paso a Paso:** Se forzaron diferentes rangos de PPM simulados para evaluar la lógica de toma de decisiones del sistema y la respuesta del motor: 
      * *Estado Normal:* El motor no se mueve. 
      * *Estado Crítico (Taquicardia/Bradicardia):* Al cruzar los umbrales configurados, el motor gira hacia la posición de alerta de manera inmediata y fluida. 
-![Circuito mostrando lecturas en los displays](docs/circuito.jpeg)  
-
-
+<p align="center">
+  <img src="docs/circuito.jpeg" width="400">
+</p> 
