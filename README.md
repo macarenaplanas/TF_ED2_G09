@@ -100,7 +100,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 * **Ensayo 1: Validación del ADC (Con Potenciómetro):**  Se utilizó un potenciómetro, donde luego se colocó el sensor, con visualización en los displays de 7 segmentos, para comprobar la correcta programación del mismo. 
 <p align="center">
-  <img src="docs/potenciometro.jpeg" width="400">
+  <img src="docs/potenciometro.jpeg" width="300">
 </p>
 
 * **Ensayo 2: Adquisición de la Señal del Sensor Óptico y Cálculo de PPM:** Con el sensor colocado en el dedo del usuario, se capturó la señal analógica. Se configuró un umbral por software para detectar los picos de la onda y calcular los intervalos entre latidos.
@@ -116,5 +116,5 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
      * *Estado Normal:* El motor no se mueve. 
      * *Estado Crítico (Taquicardia/Bradicardia):* Al cruzar los umbrales configurados, el motor gira hacia la posición de alerta de manera inmediata y fluida. 
 <p align="center">
-  <img src="docs/circuito.jpeg" width="400">
+  <img src="docs/circuito.jpeg" width="300">
 </p> 
