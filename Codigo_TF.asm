@@ -1,10 +1,3 @@
-; ============================================================
-;  PIC16F887 - FC con sensor ADC + displays MUX + motor
-;  UART: recibe valor numerico desde TeraTerm
-;  <70=B motor derecha, 70-120=N sin motor, >120=A motor izquierda
-;  RB0 = boton reset: pone displays en 0 y motor al centro
-; ============================================================
-
     LIST    p=16F887
     RADIX   HEX
     #include "p16f887.inc"
