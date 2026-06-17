@@ -6,9 +6,9 @@
 >**Año de cursado:** 2026
 >
 >**Integrantes:**
-> * Martina Bruno - 46320251
-> * Carolina Ottero - 46226180
-> * Macarena Planas Montilla - 45486586
+> * Martina Bruno 
+> * Carolina Ottero
+> * Macarena Planas Montilla 
 >   
 ---
 ## Descripcion general del proyecto
@@ -86,13 +86,15 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 * **Etapa 1: Configuración del ADC y Displays (Potenciómetro)**: Prueba inicial del módulo ADC y del multiplexado de los displays de 7 segmentos utilizando un potenciómetro como entrada analógica variable en RA0.
 
-* **Etapa 2: Validación del Sensor Óptico**: Verificación del correcto funcionamiento del sensor y el comportamiento de su señal analógica de salida.
+* **Etapa 2: Medicion de señal del sensor**: Utilizando un osciloscopio, se midieron diversos parametros de la señal proveniente del sensor.
+  
+* **Etapa 3: Validación del Sensor Óptico**: Verificación del correcto funcionamiento del sensor y el comportamiento de su señal analógica de salida.
 
-* **Etapa 3: Control Independiente del Motor**: Desarrollo y validación de las rutinas de paso (secuencias en las tablas)  para asegurar el giro correcto del motor paso a paso.
+* **Etapa 4: Control Independiente del Motor**: Desarrollo y validación de las rutinas de paso (secuencias en las tablas)  para asegurar el giro correcto del motor paso a paso.
 
-* **Etapa 4: Integración de ADC y Comunicación UART**: Ensayo conjunto del conversor analógico-digital con el módulo de comunicación serie para verificar el envío de lecturas y la recepción de comandos desde Tera Term.
+* **Etapa 5: Integración de ADC y Comunicación UART**: Ensayo conjunto del conversor analógico-digital con el módulo de comunicación serie para verificar el envío de lecturas y la recepción de comandos desde Tera Term.
 
-* **Etapa 5: Vinculación de todos los módulos**: lectura del sensor, procesamiento de las PPM, clasificación del estado del paciente y activación del motor como actuador final.
+* **Etapa 6: Vinculación de todos los módulos**: lectura del sensor, procesamiento de las PPM, clasificación del estado del paciente y activación del motor como actuador final.
  
 ---
 
@@ -103,16 +105,21 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   <img src="docs/potenciometro.jpeg" width="300">
 </p>
 
-* **Ensayo 2: Adquisición de la Señal del Sensor Óptico y Cálculo de PPM:** Con el sensor colocado en el dedo del usuario, se capturó la señal analógica. Se configuró un umbral por software para detectar los picos de la onda y calcular los intervalos entre latidos.
+* **Ensayo 2: Observacion de la señal del sensor:** Con el osciloscopio se oservó la señal obtenida a partir del sensor, en la que se identificaron diferentes parametros del mismo, tal como el voltaje pico y la frecuencia. 
+<p align="center">
+  <img src="docs/osciloscopio.jpeg" width="400">
+</p>
 
-* **Etapa 3: Control Independiente del Motor**: Utilizando un botón como interrupción externa, se comprobó el correcto funcionamiento del motor paso a paso; en el que al presionarlo, el motor hacia medio giro.
+* **Ensayo 3: Adquisición de la Señal del Sensor Óptico y Cálculo de PPM:** Con el sensor colocado en el dedo del usuario, se capturó la señal analógica. Se configuró un umbral por software para detectar los picos de la onda y calcular los intervalos entre latidos.
 
-* **Ensayo 4: Integración de ADC y Comunicación UART:** Se conectó el microcontrolador a la PC mediante el módulo UART. Se comprobó la transmisión periódica de datos, en el que cada vez que se procesaba un ciclo de lecturas, el sistema enviaba de forma clara el valor de PPM y el estado de alerta del paciente. Asimismo, se testeó la recepción de comandos desde Tera Term hacia el sistema sin pérdida de caracteres. 
+* **Etapa 4: Control Independiente del Motor**: Utilizando un botón como interrupción externa, se comprobó el correcto funcionamiento del motor paso a paso; en el que al presionarlo, el motor hacia medio giro.
+
+* **Ensayo 5: Integración de ADC y Comunicación UART:** Se conectó el microcontrolador a la PC mediante el módulo UART. Se comprobó la transmisión periódica de datos, en el que cada vez que se procesaba un ciclo de lecturas, el sistema enviaba de forma clara el valor de PPM y el estado de alerta del paciente. Asimismo, se testeó la recepción de comandos desde Tera Term hacia el sistema sin pérdida de caracteres. 
 <p align="center">
   <img src="docs/comunicacion.jpeg" width="400">
 </p>
 
-* **Ensayo 5: Lógica de Control y Actuación del Motor Paso a Paso:** Se forzaron diferentes rangos de PPM simulados para evaluar la lógica de toma de decisiones del sistema y la respuesta del motor: 
+* **Ensayo 6: Lógica de Control y Actuación del Motor Paso a Paso:** Se forzaron diferentes rangos de PPM simulados para evaluar la lógica de toma de decisiones del sistema y la respuesta del motor: 
      * *Estado Normal:* El motor no se mueve. 
      * *Estado Crítico (Taquicardia/Bradicardia):* Al cruzar los umbrales configurados, el motor gira hacia la posición de alerta de manera inmediata y fluida. 
 <p align="center">
