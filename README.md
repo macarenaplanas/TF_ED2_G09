@@ -3,7 +3,7 @@
 >
 >**Profesor:** Marcos Blasco
 >
->**Año de cursado:** 2026
+>**Año:** 2026
 >
 >**Integrantes:**
 > * Martina Bruno 
