@@ -86,7 +86,7 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
 
 * **Etapa 1: Configuración del ADC y Displays (Potenciómetro)**: Prueba inicial del módulo ADC y del multiplexado de los displays de 7 segmentos utilizando un potenciómetro como entrada analógica variable en RA0.
 
-* **Etapa 2: Medicion de señal del sensor**: Utilizando un osciloscopio, se intentó osbservar la señal proveniente del sensor.
+* **Etapa 2: Medicion de señal del sensor**: Utilizando un osciloscopio, se intentó observar la señal proveniente del sensor.
   
 * **Etapa 3: Validación del Sensor Óptico**: Verificación del correcto funcionamiento del sensor y el comportamiento de su señal analógica de salida.
 
