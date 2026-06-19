@@ -105,10 +105,15 @@ Este dispositivo está dirigido al personal de salud y a unidades de cuidados in
   <img src="docs/potenciometro.jpeg" width="300">
 </p>
 
-* **Ensayo 2: Observacion de la señal del sensor:** Se intentó medir la salida analógica del sensor en los canales del osciloscopio, resultando inviable debido a la bajísima amplitud de la componente alterna, sumado a los artefactos de movimiento y ruido óptico de 50 Hz que saturaban la pantalla al no contar con un filtrado analógico acoplado en AC. 
+* **Ensayo 2: Observacion de la señal del sensor:** Se intentó medir la salida analógica con el osciloscopio. Sin embargo, la amplitud de la misma es muy pequeña y cuenta con interferencias tales como el ruido ambiental.Los picos registrados en el instrumento no corresponden al ritmo cardíaco, sino picos de tensión causados al retirar y volver a colocar el dedo sobre el sensor.
 <p align="center">
   <img src="docs/osciloscopio.jpeg" width="400">
 </p>
+Para verificar este comportamiento, se consultó la hoja de datos del componente. El fabricante detalla que, al tratarse de una señal biológica de muy baja frecuencia, no es recomendable el uso de un osciloscopio.
+<p align="center">
+  <img src="docs/especificaciones_fabricante.png" width="400">
+</p>
+Ante esto, se conectó la salida del sensor directamente al ADC del microcontrolador. Al monitorear los valores digitalizados en tiempo real mediante los displays, se lograron identificarlos máximos y mínimos del ciclo sanguíneo. Con estos datos experimentales se definió el umbral óptimo para el algoritmo de detección por software.
 
 * **Ensayo 3: Adquisición de la Señal del Sensor Óptico y Cálculo de PPM:** Con el sensor colocado en el dedo del usuario, se capturó la señal analógica. Se configuró un umbral por software para detectar los picos de la onda y calcular los intervalos entre latidos.
 
